@@ -64,12 +64,12 @@ class ExtentionManagement(commands.Cog):
     '[extention] must have no spaces and must be a valid extention\n'
     '[action] can be one of: \'add\' \'a\' \'remove\' \'r\' or \'list\'')
     async def startup(self, ctx, action=None, *, extention=None):
-        if not action or action.lower() not in ('add', 'a', 'remove', 'r', 'list') or extention.find(' ') != -1 or not extention:
+        if not action or action.lower() not in ('add', 'a', 'remove', 'r', 'list') or extention.find(' ') != -1 or (not extention and action.lower() == 'list'):
             await ctx.send(f'{ctx.author.mention}, Invalid syntax, see `{self.client.command_prefix}help startup` for more information')
         elif action.lower() in ('a', 'add'):
             with open('./cogs/on_startup.txt', 'a') as file:
                 file.write(f'\n{extention}')
-                await ctx.send(f'{ctx.author.mention}, Extention \'{extention}\' added to startup.')
+                await ctx.send(f'{ctx.author.mention}, Extention `{extention}` added to startup.')
         elif action.lower() in ('r', 'remove'):
             with open('./cogs/on_startup.txt', 'r') as f:
                 data = f.read()
@@ -78,7 +78,15 @@ class ExtentionManagement(commands.Cog):
                 if line == extention:
                     del line
             with open('./cogs/on_startup.txt', 'w') as f:
-                f.write(data.join('\n'))
+                f.write('\n'.join(data))
+            await ctx.send(f'{ctx.author.mention}, Extention `{extention}` removed from startup.')
+        elif action.lower() == 'list':
+            files = os.listdir('./cogs')
+            for filename in files:
+                if not filename.endswith('.py'):
+                    del filename
+            newline = '\n' # i had to do this because i was getting a stupid error "unexpected character after line continuation character"
+            await ctx.send(f'{ctx.author.mention}, Here is all availible extentions:\n```{newline.join(files)}```')
 
 
 
