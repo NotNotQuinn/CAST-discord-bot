@@ -8,8 +8,8 @@ class Admin(commands.Cog):
         self.client = client
 
     @commands.command(hidden=True)
-    async def echo(self, ctx):
-        await ctx.send(f'{ctx.author.mention}, Pong! {round(self.client.latency * 1000)}ms')
+    async def echo(self, ctx, *, words):
+        await ctx.send(f'{words}')
 
 
 def setup(client):
