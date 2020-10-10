@@ -1,5 +1,5 @@
 @ECHO off
 :CODE
 PYTHON ./src/bot.py
-CHOICE /M "Restart?"
-IF ERRORLEVEL 1 GOTO CODE
+CHOICE /M "Restart"
+IF ERRORLEVEL 2 GOTO CODE

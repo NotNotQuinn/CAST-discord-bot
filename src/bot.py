@@ -5,7 +5,6 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from ascii_art import ascii_art
 from os import getenv
-from random import seed, choice
 import logging
 
 # logging configuration
@@ -13,8 +12,9 @@ logging.basicConfig(format='[%(asctime)s] (%(name)s) %(levelname)s : %(message)s
                     datefmt='%m/%d/%Y %z %H:%M:%S', level=logging.INFO)
 
 # ascii art & credit
-seed()
-print(choice(ascii_art))
+print(' _______ _______ _______ _______\n'
+      ' |       |_____| |______    |   \n'
+      ' |_____  |     | ______|    |   ')
 print('Your running CAST by NotQuinn#6953')
 
 # load token from .env file
@@ -22,7 +22,7 @@ load_dotenv()
 CAST_TOKEN = getenv('CAST_TOKEN')
 
 # remove no longer needed imports
-del ascii_art, seed, choice, getenv, load_dotenv
+del ascii_art, getenv, load_dotenv
 
 # bot start
 client = commands.Bot(command_prefix='c.')
@@ -42,19 +42,19 @@ class ExtensionManagement(commands.Cog):
     
     @commands.command(brief='Load an extension', useage='(extension)', help='Loads an extension\n'
     '(extension) must have no spaces and must be a valid extension')
-    async def load(self, ctx, *, extension=None):
+    async def load(self, ctx, extension):
         client.load_extension(f'cogs.{extension}.py')
         await ctx.send(f'{ctx.author.mention}, {extension} loaded!')
 
     @commands.command(brief='Unload an extension', useage='(extension)', help='Unloads an extension\n'
     '(extension) must have no spaces and must be a valid extension')
-    async def unload(self, ctx, *, extension=None):
+    async def unload(self, ctx, extension):
         client.unload_extension(f'cogs.{extension}.py')
         await ctx.send(f'{ctx.author.mention}, {extension} unloaded!')
 
     @commands.command(brief='Reload an extension', useage='(extension)', help='Reloads an extension\n'
     '(extension) must have no spaces and must be a valid extension')
-    async def reload(self, ctx, *, extension=None):
+    async def reload(self, ctx, extension):
         client.reload_extension(f'cogs.{extension}.py')
         await ctx.send(f'{ctx.author.mention}, {extension} reloaded!')
 
@@ -110,24 +110,35 @@ class ExtensionManagement(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f'{ctx.author.mention}, Please provide an action, see `{client.command_prefix}help startup` for more information.')
 
+    @unload.error
     @load.error
-    async def load_error(ctx, error):
+    async def load_error(self, ctx, error):
         if isinstance(error, commands.ExtensionNotFound) or isinstance(error, ModuleNotFoundError):
             await ctx.send(f'{ctx.author.mention}, Extension not found!')
         elif isinstance(error, commands.ExtensionNotLoaded):
             await ctx.send(f'{ctx.author.mention}, Extension not loaded!')
-        else:
-            print('ALORT ERROR THINGY NOT WORKIGN')
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f'{ctx.author.mention}, Please provide an extention to load/unload.')
+
+    @reload.error
+    async def reload_error(self, ctx, error):
+        if isinstance(error, commands.ExtensionNotFound) or isinstance(error, ModuleNotFoundError):
+            await ctx.send(f'{ctx.author.mention}, Extension not found! Change Reverted.')
+        elif isinstance(error, commands.ExtensionNotLoaded):
+            await ctx.send(f'{ctx.author.mention}, Extension not loaded! Change Reverted.')
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f'{ctx.author.mention}, Please provide an extention to reload.')
 
 
 
-def load_starting_cogs(client, path):
-    with open(path, 'r') as file:
-        data = file.read().split('\n')
-        startup_cogs = list()
-        for line in data:
-            startup_cogs.append(str(line))
-    
+
+
+def load_starting_cogs(client):
+    with open('./src/cogs/on_startup.txt', 'r') as f:
+        data = f.read().split('\n')
+    startup_cogs = list()
+    for line in data:
+        startup_cogs.append(line)
     for filename in os.listdir('./src/cogs'):
         if filename.endswith('.py') and filename in startup_cogs:
             client.load_extension(f'cogs.\'{filename[:-3]}\'')
@@ -135,7 +146,7 @@ def load_starting_cogs(client, path):
 
 # add the ExtensionManagement cog and load cogs in ./src/cogs/on_startup.txt
 client.add_cog(ExtensionManagement(client))
-load_starting_cogs(client, path='./src/cogs/on_startup.txt')
+load_starting_cogs(client)
 
 # start the bot
 print('Gathering battle gear...')
