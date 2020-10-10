@@ -34,77 +34,108 @@ async def on_ready():
     print('CAST is ready to battle...')
 
 
-# cog to manage extentions, cannot be unloaded
-class ExtentionManagement(commands.Cog):
+# cog to manage extensions, cannot be unloaded
+class ExtensionManagement(commands.Cog):
 
     def __init__(self, client):
         self.client = client
     
-    @commands.command(brief='Load an extention', useage='[extention]', help='Loads an extention\n'
-    '[extention] must have no spaces and must be a valid extention')
-    async def load(self, ctx, *, extention=None):
-        client.load_extension(f'cogs.{extention}')
-        await ctx.send(f'{ctx.author.mention}, {extention} loaded!')
+    @commands.command(brief='Load an extension', useage='(extension)', help='Loads an extension\n'
+    '(extension) must have no spaces and must be a valid extension')
+    async def load(self, ctx, *, extension=None):
+        client.load_extension(f'cogs.{extension}.py')
+        await ctx.send(f'{ctx.author.mention}, {extension} loaded!')
 
-    @commands.command(brief='Unload an extention', useage='[extention]', help='Unloads an extention\n'
-    '[extention] must have no spaces and must be a valid extention')
-    async def unload(self, ctx, *, extention=None):
-        client.unload_extension(f'cogs.{extention}')
-        await ctx.send(f'{ctx.author.mention}, {extention} unloaded!')
+    @commands.command(brief='Unload an extension', useage='(extension)', help='Unloads an extension\n'
+    '(extension) must have no spaces and must be a valid extension')
+    async def unload(self, ctx, *, extension=None):
+        client.unload_extension(f'cogs.{extension}.py')
+        await ctx.send(f'{ctx.author.mention}, {extension} unloaded!')
 
-    @commands.command(brief='Reload an extention', useage='[extention]', help='Reloads an extention\n'
-    '[extention] must have no spaces and must be a valid extention')
-    async def reload(self, ctx, *, extention=None):
-        client.reload_extension(f'cogs.{extention}')
-        await ctx.send(f'{ctx.author.mention}, {extention} reloaded!')
+    @commands.command(brief='Reload an extension', useage='(extension)', help='Reloads an extension\n'
+    '(extension) must have no spaces and must be a valid extension')
+    async def reload(self, ctx, *, extension=None):
+        client.reload_extension(f'cogs.{extension}.py')
+        await ctx.send(f'{ctx.author.mention}, {extension} reloaded!')
 
-    @commands.command(brief='Add/remove an extention from startup', usage='[action] [extention]', 
-    help='Adds or removes an extention from startup. If an extention is on startup the next time '
-    'the bot starts the extention will be loaded automatically\n'
-    '[extention] must have no spaces and must be a valid extention\n'
-    '[action] can be one of: \'add\' \'a\' \'remove\' \'r\' or \'list\'')
-    async def startup(self, ctx, action=None, *, extention=None):
-        if not action or action.lower() not in ('add', 'a', 'remove', 'r', 'list') or extention.find(' ') != -1 or (not extention and action.lower() == 'list'):
-            await ctx.send(f'{ctx.author.mention}, Invalid syntax, see `{self.client.command_prefix}help startup` for more information')
-        elif action.lower() in ('a', 'add'):
-            with open('./cogs/on_startup.txt', 'a') as file:
-                file.write(f'\n{extention}')
-                await ctx.send(f'{ctx.author.mention}, Extention `{extention}` added to startup.')
-        elif action.lower() in ('r', 'remove'):
-            with open('./cogs/on_startup.txt', 'r') as f:
+    @commands.command(brief='Add/remove an extension from startup', aliases=['setup'], usage='[[add|a]|[remove|r]|list|listall] (extension)', 
+    help='Adds or removes an extension from startup. If an extension is on startup the next time '
+    'the bot starts the extension will be loaded automatically\n'
+    '    \'list\' lists all of the extensions in startup\n'
+    '    \'listall\' lists all extensions\n'
+    '    \'add\' and \'a\' add (extension) to startup\n'
+    '    \'remove\' and \'r\' removes (extension) from startup\n'
+    '(extension) must have no spaces and must be a valid extension (not needed on \'list\' or \'listall\')\n'
+    f'Giving no [action] or (extention) will return the same as \'{client.command_prefix}startup list\'')
+    async def startup(self, ctx, action, extension=None):
+        newline = '\n'  # I have to do this because `func(f'{'\n'}')` makes it think I want to continue the line
+        if action.lower() in ('a', 'add') and extension:  # adding an extension
+            if not extension:
+                await ctx.send(f'{ctx.author.mention}, Please provide an extension to remove!')
+                return
+            with open('./src/cogs/on_startup.txt', 'a') as file:
+                file.write(f'\n{extension}')
+                await ctx.send(f'{ctx.author.mention}, Extension `{extension}` added to startup.')
+        elif action.lower() in ('r', 'remove'):  # removing an extension
+            if not extension:
+                await ctx.send(f'{ctx.author.mention}, Please provide an extension to remove!')
+                return
+            with open('./src/cogs/on_startup.txt', 'r') as f:
                 data = f.read()
             data = data.split('\n')
             for line in data:
-                if line == extention:
+                if line == extension:
                     del line
-            with open('./cogs/on_startup.txt', 'w') as f:
+            with open('./src/cogs/on_startup.txt', 'w') as f:
                 f.write('\n'.join(data))
-            await ctx.send(f'{ctx.author.mention}, Extention `{extention}` removed from startup.')
-        elif action.lower() == 'list':
-            files = os.listdir('./cogs')
-            for filename in files:
-                if not filename.endswith('.py'):
-                    del filename
-            newline = '\n' # i had to do this because i was getting a stupid error "unexpected character after line continuation character"
-            await ctx.send(f'{ctx.author.mention}, Here is all availible extentions:\n```{newline.join(files)}```')
+            await ctx.send(f'{ctx.author.mention}, Extension `{extension}` removed from startup.')
+        elif action.lower() == 'listall':  # list all extensions
+            filenames = os.listdir('./src/cogs')
+            for filename in filenames:
+                if filename.endswith('.py'):
+                    filenames[filenames.index(filename)] = filename[:-3]
+                else:
+                    filenames.remove(filename)
+            filenames.remove('__pycache__')  # idk, it doesnt remove it in the for loop
+            await ctx.send(f'{ctx.author.mention}, Here is all availible extensions:\n```\n{newline.join(filenames)}```')
+        elif action.lower() == 'list':  # list enabled extensions
+            with open('./src/cogs/on_startup.txt', 'r') as f:
+                enabled_extensions = f.readlines()
+            await ctx.send(f'{ctx.author.mention}, Here is all enabled extensions:\n```\n{newline.join(enabled_extensions)}```')
+        else:
+            await ctx.send(f'{ctx.author.mention}, Invalid syntax, see `{self.client.command_prefix}help startup` for more information')
+
+    @startup.error
+    async def startup_command_error(ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f'{ctx.author.mention}, Please provide an action, see `{client.command_prefix}help startup` for more information.')
+
+    @load.error
+    async def load_error(ctx, error):
+        if isinstance(error, commands.ExtensionNotFound) or isinstance(error, ModuleNotFoundError):
+            await ctx.send(f'{ctx.author.mention}, Extension not found!')
+        elif isinstance(error, commands.ExtensionNotLoaded):
+            await ctx.send(f'{ctx.author.mention}, Extension not loaded!')
+        else:
+            print('ALORT ERROR THINGY NOT WORKIGN')
 
 
 
-def load_starting_cogs(client):
-    with open('./cogs/on_startup.txt', 'r') as file:
+def load_starting_cogs(client, path):
+    with open(path, 'r') as file:
         data = file.read().split('\n')
         startup_cogs = list()
         for line in data:
             startup_cogs.append(str(line))
     
-    for filename in os.listdir('./cogs'):
+    for filename in os.listdir('./src/cogs'):
         if filename.endswith('.py') and filename in startup_cogs:
             client.load_extension(f'cogs.\'{filename[:-3]}\'')
 
 
-# add the ExtentionManagement cog and load cogs in ./cogs/on_startup.txt
-client.add_cog(ExtentionManagement(client))
-load_starting_cogs(client)
+# add the ExtensionManagement cog and load cogs in ./src/cogs/on_startup.txt
+client.add_cog(ExtensionManagement(client))
+load_starting_cogs(client, path='./src/cogs/on_startup.txt')
 
 # start the bot
 print('Gathering battle gear...')
