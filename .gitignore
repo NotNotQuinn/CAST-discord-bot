@@ -1,6 +1,7 @@
 # IDE files
 venv/
 .idea/
+.vscode/settings.json
 
 # Cache because I realy dont want to leak my token, and i dont know how the cache works
 __pycache__/

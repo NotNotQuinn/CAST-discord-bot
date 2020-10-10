@@ -1,9 +1,14 @@
+# ascii art & credit
+print(' _______ _______ _______ _______\n'
+      ' |       |_____| |______    |   \n'
+      ' |_____  |     | ______|    |   ')
+print('Your running CAST by NotQuinn#6953')
+
 # Imports
 import discord
 import os
 from discord.ext import commands
 from dotenv import load_dotenv
-from ascii_art import ascii_art
 from os import getenv
 import logging
 
@@ -11,18 +16,12 @@ import logging
 logging.basicConfig(format='[%(asctime)s] (%(name)s) %(levelname)s : %(message)s', 
                     datefmt='%m/%d/%Y %z %H:%M:%S', level=logging.INFO)
 
-# ascii art & credit
-print(' _______ _______ _______ _______\n'
-      ' |       |_____| |______    |   \n'
-      ' |_____  |     | ______|    |   ')
-print('Your running CAST by NotQuinn#6953')
-
 # load token from .env file
 load_dotenv()
 CAST_TOKEN = getenv('CAST_TOKEN')
 
 # remove no longer needed imports
-del ascii_art, getenv, load_dotenv
+del getenv, load_dotenv
 
 # bot start
 client = commands.Bot(command_prefix='c.')
