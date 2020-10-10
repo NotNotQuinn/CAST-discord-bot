@@ -1,2 +1,5 @@
-python ./src/bot.py
-pause
+@ECHO off
+:CODE
+PYTHON ./src/bot.py
+CHOICE /M "Restart?"
+IF ERRORLEVEL 2 GOTO CODE
