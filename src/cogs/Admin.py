@@ -13,7 +13,8 @@ class Admin(commands.Cog):
 
     @commands.command()
     async def extensions(self, ctx):
-        await ctx.send(f'{ctx.author.mention}, Here are all the loaded extensions:\n```\n{self.client.cogs}```')        
+        newline = '\n'
+        await ctx.send(f'{ctx.author.mention}, Here are all the loaded extensions:\n```\n{newline.join(list(self.client.cogs))}```')        
 
 
 def setup(client):
