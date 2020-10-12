@@ -1,5 +1,6 @@
 @ECHO off
 :CODE
 PYTHON ./src/bot.py
-CHOICE /C YN /M "Restart"
+ECHO The bot has stopped working!
+CHOICE /C NY /M "Restart"
 IF ERRORLEVEL 2 GOTO CODE
