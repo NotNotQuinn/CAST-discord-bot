@@ -12,21 +12,44 @@ from dotenv import load_dotenv
 import logging
 import check
 from emotes import Emotes
+import prefixStuff as prefix
 
 # logging configuration
 logging.basicConfig(format='[%(asctime)s] (%(name)s) %(levelname)s : %(message)s', 
-                    datefmt='%m/%d/%Y %z %H:%M:%S', level=logging.DEBUG)
+                    datefmt='%m/%d/%Y %z %H:%M:%S', level=logging.INFO)
 
 # load token from .env file
 load_dotenv()
 CAST_TOKEN = os.getenv('CAST_TOKEN')
 
 # bot start
-prefix = 'c.'
-client = commands.Bot(command_prefix=prefix)
+client = commands.Bot(command_prefix=prefix.get_prefix)
 logging.info(f'Bot prefix is \'{prefix}\'')
 
 
+# prefix stuffs
+# when we join a new server or "guild" we add it to the list of prefixes, with a defalt value of 'c.'
+@cleint.event
+async def on_guild_join(guild):
+    with open('./src/prefixes.json', 'r') as f:
+        prefixes = json.load(f)
+
+    prefixes[str(guild.id)] = 'c.'
+
+    with open('./src/prefixes.json', 'w') as f:
+        json.dump(prefixes, f)
+
+@client.event
+async def on_guild_remove(guild):
+    with open('./src/prefixes.json', 'r') as f:
+        prefixes = json.load(f)
+
+    prefixes.pop(str(guild.id))
+
+    with open('./src/prefixes.json', 'w') as f:
+        json.dump(prefixes, f)
+
+# 
 def get_all_extensions():
     filenames = os.listdir('./src/cogs')
     for filename in filenames:
@@ -52,10 +75,10 @@ def load_starting_cogs(client):
 
 @client.event
 async def on_ready():
+    await client.change_presence(status=discord.Status.online, activity=discord.Game('with cute kittens!'))
     client.add_cog(ExtensionManagement(client))
     load_starting_cogs(client)
     logging.info(f'CAST is ready to battle...')
-    await client.change_presence(status=discord.Status.idle, activity=discord.Game('with cute kittens!'))
 
 
 # cog to manage extensions, cannot be unloaded
