@@ -1,9 +1,15 @@
 # CAST-discord-bot
-CAST stands for Custom Alert System for Twitch. I am simpily doing this project for fun, and to learn python. **You are free to run this code on your own bot account, *however you must include the license attached.*** I would apreciate that you also keep the credits built in to the commands. 
+- [x] Archived
+
+![Okayge](https://cdn.betterttv.net/emote/5fa59c774dfba164402933ca/3x)
+![TeaTime](https://cdn.betterttv.net/emote/56f6eb647ee3e8fc6e4fe48e/3x)
+Dont recommend using
+
+~~CAST stands for Custom Alert System for Twitch. I am simpily doing this project for fun, and to learn python. **You are free to run this code on your own bot account, *however you must include the license attached.*** I would apreciate that you also keep the credits built in to the commands.~~
 ## Using The Bot
-1. Read the `LISENCE` in full.
-2. Make sure you have a recent version of [python installed and added to PATH](https://datatofish.com/add-python-to-windows-path/).
-3. Then **run `Start.bat`**.
+1. ~~Read the `LISENCE` in full.~~
+2. ~~Make sure you have a recent version of [python installed and added to PATH](https://datatofish.com/add-python-to-windows-path/).~~
+3. ~~Then **run `Start.bat`**.~~
 ## Editing the bot.
 You can do whatever you want basicaly, but make sure to read the `LICENSE`.
 
